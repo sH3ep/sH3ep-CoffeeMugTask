@@ -1,3 +1,5 @@
+using CoffeeMugTask.Persistance;
+using CoffeeMugTask.Products;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
-namespace CoffeMugTask
+namespace CoffeeMugTask
 {
     public class Startup
     {
@@ -26,6 +28,12 @@ namespace CoffeMugTask
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CoffeeMug Task", Version = "v1" });
             });
+
+            services.AddDbContext<CmtContext>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IProductService, ProductService>();
 
             services.AddControllers();
         }

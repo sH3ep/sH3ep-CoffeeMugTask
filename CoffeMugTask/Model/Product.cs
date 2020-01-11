@@ -10,7 +10,7 @@ namespace CoffeeMugTask.Model
     {
         public Guid Id { set; get; }
 
-        [StringLength(150)]
+        [StringLength(100)]
         public string Name { set; get; }
 
         public decimal Price { set; get; }
