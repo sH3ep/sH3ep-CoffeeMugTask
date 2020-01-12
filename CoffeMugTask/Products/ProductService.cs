@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CoffeeMugTask.Products.Dto;
 using CoffeeMugTask.Model;
 using CoffeeMugTask.Persistance.Repositories.Exceptions;
 using CoffeeMugTask.Products.Validators;
+using FluentValidation;
 
 namespace CoffeeMugTask.Products
 {
@@ -23,13 +23,20 @@ namespace CoffeeMugTask.Products
 
         public async Task<Guid> Add(Product product)
         {
-            if (!product.IsProductToAddValid())
+            var validator = new ProductValidator();
+            var validationResult = validator.Validate(product, ruleSet: "Add");
+
+            if (validationResult.IsValid)
             {
-                throw new EntityValidationException("Wrong data to add new Product");
+                _productRepository.Add(product);
+                await _unitOfWork.Complete();
+                return product.Id;
             }
-            _productRepository.Add(product);
-            await _unitOfWork.Complete();
-            return product.Id;
+            else
+            {
+                throw new EntityValidationException(validationResult.ToString("----"));
+            }
+
         }
 
         public async Task Delete(Guid id)
@@ -65,7 +72,7 @@ namespace CoffeeMugTask.Products
                 return products;
             }
 
-            throw new EntityNotFoundException("There are no any product");
+            throw new EntityNotFoundException("There are no products");
         }
 
 
@@ -76,13 +83,18 @@ namespace CoffeeMugTask.Products
                 throw new EntityNotFoundException("There are no any product with this Id to update");
             }
 
-            if (!product.IsProductToUpdateValid())
-            {
-                throw new EntityValidationException("Wrong data to update Product");
-            }
+            var validator = new ProductValidator();
+            var validationResult = validator.Validate(product, ruleSet: "Update");
 
-            _productRepository.Update(product);
-            await _unitOfWork.Complete();
+            if (validationResult.IsValid)
+            {
+                _productRepository.Update(product);
+                await _unitOfWork.Complete();
+            }
+            else
+            {
+                throw new EntityValidationException(validationResult.ToString("----"));
+            }
         }
 
     }
