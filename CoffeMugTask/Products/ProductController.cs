@@ -56,9 +56,6 @@ namespace CoffeeMugTask.Products
         [HttpPost]
         public async Task<ActionResult<Guid>> Post([FromBody]ProductCreateRequestDto request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest();
-
             try
             {
                 var product = _mapper.Map<Product>(request);
@@ -74,9 +71,6 @@ namespace CoffeeMugTask.Products
         [HttpPut]
         public async Task<ActionResult> Put([FromBody]ProductUpdateRequestDto request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest();
-
             try
             {
                 var product = _mapper.Map<Product>(request);

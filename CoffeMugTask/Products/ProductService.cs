@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 using CoffeeMugTask.Products.Dto;
 using CoffeeMugTask.Model;
 using CoffeeMugTask.Persistance.Repositories.Exceptions;
+using CoffeeMugTask.Products.Validators;
 
 namespace CoffeeMugTask.Products
 {
-    public class ProductService: IProductService
+    public class ProductService : IProductService
     {
 
         private readonly IProductRepository _productRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public ProductService (IProductRepository productRepository,IUnitOfWork unitOfWork)
+        public ProductService(IProductRepository productRepository, IUnitOfWork unitOfWork)
         {
             _productRepository = productRepository;
             _unitOfWork = unitOfWork;
@@ -22,6 +23,10 @@ namespace CoffeeMugTask.Products
 
         public async Task<Guid> Add(Product product)
         {
+            if (!product.IsProductToAddValid())
+            {
+                throw new EntityValidationException("Wrong data to add new Product");
+            }
             _productRepository.Add(product);
             await _unitOfWork.Complete();
             return product.Id;
@@ -29,17 +34,14 @@ namespace CoffeeMugTask.Products
 
         public async Task Delete(Guid id)
         {
-            var product = await _productRepository.Get(id);
+            if (!_productRepository.DoesProductExist(id))
+            {
+                throw new EntityNotFoundException("Product to delete not found");
+            }
 
-            if (product != null)
-            {
-                _productRepository.Remove(product);
-                await _unitOfWork.Complete();
-            }
-            else
-            {
-                throw new EntityNotFoundException("Product to delete not fount");
-            }
+            var product = await _productRepository.Get(id);
+            _productRepository.Remove(product);
+            await _unitOfWork.Complete();
         }
 
         public async Task<Product> Get(Guid id)
@@ -65,28 +67,23 @@ namespace CoffeeMugTask.Products
 
             throw new EntityNotFoundException("There are no any product");
         }
-    
+
 
         public async Task Update(Product product)
         {
-            if (!await DoesProductExist(product.Id))
+            if (!_productRepository.DoesProductExist(product.Id))
             {
-                throw new EntityNotFoundException("There are no any product to update");
+                throw new EntityNotFoundException("There are no any product with this Id to update");
+            }
+
+            if (!product.IsProductToUpdateValid())
+            {
+                throw new EntityValidationException("Wrong data to update Product");
             }
 
             _productRepository.Update(product);
             await _unitOfWork.Complete();
         }
 
-
-        private async Task<bool> DoesProductExist(Guid id)
-        {
-            if (await _productRepository.Get(id) is null)
-            {
-                return false;
-            }
-
-            return true;
-        }
     }
 }

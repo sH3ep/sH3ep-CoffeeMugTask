@@ -36,6 +36,7 @@ namespace CoffeeMugTask
             });
 
             services.AddDbContext<CmtContext>();
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<IProductRepository, ProductRepository>();

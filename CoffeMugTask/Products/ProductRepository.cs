@@ -14,5 +14,15 @@ namespace CoffeeMugTask.Products
         public ProductRepository(CmtContext context) : base(context)
         {
         }
+
+        public bool DoesProductExist(Guid id)
+        {
+            if(Entities.Any(x => x.Id == id))
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

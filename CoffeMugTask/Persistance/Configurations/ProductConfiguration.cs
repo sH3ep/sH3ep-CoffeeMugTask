@@ -17,7 +17,7 @@ namespace CoffeeMugTask.Persistance.Configurations
 
             builder.Property(x => x.Id).HasColumnName("Id").IsRequired();
             builder.Property(x => x.Name).HasColumnName("Name").HasColumnType("nvarchar(100)").IsRequired().HasMaxLength(100);
-            builder.Property(x => x.Price).HasColumnName("Price").HasColumnType("decimal(28, 9)").IsRequired();
+            builder.Property(x => x.Price).HasColumnName("Price").HasColumnType("decimal(18, 2)").IsRequired();
 
         }
     }

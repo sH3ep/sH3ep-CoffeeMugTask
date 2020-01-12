@@ -9,5 +9,6 @@ namespace CoffeeMugTask.Products
 {
     public interface IProductRepository:IRepository<Product>
     {
+        bool DoesProductExist(Guid id);
     }
 }
