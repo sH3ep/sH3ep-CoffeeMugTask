@@ -48,6 +48,8 @@ namespace CoffeeMugTask_Test
             return products;
         }
 
+        #region GetAllTests
+
         [Test]
         public async Task GetAll()
         {
@@ -73,6 +75,10 @@ namespace CoffeeMugTask_Test
             var e = Assert.ThrowsAsync<EntityNotFoundException>(async () => await _productService.GetAll());
 
         }
+
+        #endregion
+
+        #region GetTests
 
         [Test]
         public async Task Get_GoodIdHasBeenGiven()
@@ -100,6 +106,10 @@ namespace CoffeeMugTask_Test
             Assert.That(e.Message.Equals("Product with that Id does not exists"));
         }
 
+        #endregion
+
+        #region AddTests
+
         [Test]
         public async Task Add_GoodProductHasBeenGiven()
         {
@@ -108,7 +118,8 @@ namespace CoffeeMugTask_Test
             var serviceInputProduct = new Product { Name = "Imie", Price = 12.54m };
 
 
-            _mockProductRepository.Setup(repo => repo.Add(new Product() { Name = "Imie", Price = 12.54m })).Returns(testProduct);
+            _mockProductRepository.Setup(repo => repo.Add(serviceInputProduct)).Returns(new Product { Id = id, Name = "Imie", Price = 12.54m });
+            // _mockProductRepository.Setup(repo => repo.Get(testProduct.Id)).ReturnsAsync((Product)null);
 
             var productId = await _productService.Add(serviceInputProduct);
 
@@ -170,16 +181,19 @@ namespace CoffeeMugTask_Test
             var e = Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Add((Product)null));
         }
 
+        #endregion
+
+        #region UpdateTests
 
         [Test]
         public async Task Update_CorrectProductHasBeenGiven()
         {
             var id = Guid.NewGuid();
             var testProduct = new Product { Id = id, Name = "Imie", Price = 3.0m };
-            var serviceInputProduct = new Product {Id = id, Name = "Imie", Price = 2.0m };
+            var serviceInputProduct = new Product { Id = id, Name = "Imie", Price = 2.0m };
 
             _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
-            _mockProductRepository.Setup(repo => repo.Update(new Product() { Id = id , Name = "Imie", Price = 2.0m })).Returns(testProduct);
+            _mockProductRepository.Setup(repo => repo.Update(serviceInputProduct)).Returns(testProduct);
 
             await _productService.Update(serviceInputProduct);
 
@@ -195,18 +209,112 @@ namespace CoffeeMugTask_Test
 
             _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(false);
 
-           
-
-            var e = Assert.ThrowsAsync<EntityNotFoundException>(async () => await _productService.Update(serviceInputProduct));
+            Assert.ThrowsAsync<EntityNotFoundException>(async () => await _productService.Update(serviceInputProduct));
 
             Assert.Pass();
         }
 
         [Test]
+        public async Task Update_ProductIdIsZero()
+        {
+            var id = Guid.Empty;
+            var serviceInputProduct = new Product { Id = id, Name = "Imie", Price = 0.0m };
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
+
+            Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Update(serviceInputProduct));
+        }
+
+        [Test]
         public async Task Update_ProductIsNull()
         {
-            var e = Assert.ThrowsAsync<EntityNotFoundException>(async () => await _productService.Update(null));
+            var id = Guid.Empty;
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
+            Assert.ThrowsAsync<EntityNotFoundException>(async () => await _productService.Update(null));
+        }
+
+        [Test]
+        public async Task Update_ToShortProductNameHasBeenGiven()
+        {
+            var id = Guid.NewGuid();
+            var serviceInputProduct = new Product { Id = id, Name = "", Price = 2.0m };
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
+
+            Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Update(serviceInputProduct));
 
         }
+
+        [Test]
+        public async Task Update_ToLongProductNameHasBeenGiven()
+        {
+            var id = Guid.NewGuid();
+            var serviceInputProduct = new Product { Id = id, Name = "qwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwerqwer", Price = 2.0m };
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
+
+            Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Update(serviceInputProduct));
+
+        }
+
+        [Test]
+        public async Task Update_ProductNameIsNull()
+        {
+            var id = Guid.NewGuid();
+            var serviceInputProduct = new Product { Id = id, Name = null, Price = 2.0m };
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
+
+            Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Update(serviceInputProduct));
+        }
+
+        [Test]
+        public async Task Update_ProductPriceIsZero()
+        {
+            var id = Guid.NewGuid();
+            var serviceInputProduct = new Product { Id = id, Name = "Imie", Price = 0.0m };
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
+
+            Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Update(serviceInputProduct));
+        }
+
+
+        #endregion
+
+        #region DeleteTests
+
+        [Test]
+        public async Task Delete_ProductToDeleteExists()
+        {
+            var id = Guid.NewGuid();
+            var testProduct = new Product { Id = id, Name = "Imie", Price = 3.0m };
+            var serviceInputProduct = new Product { Id = id, Name = "Imie", Price = 2.0m };
+
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
+            _mockProductRepository.Setup(repo => repo.Get(id)).ReturnsAsync(testProduct);
+            _mockProductRepository.Setup(repo => repo.Remove(testProduct));
+
+            await _productService.Delete(id);
+
+            Assert.Pass();
+        }
+
+        [Test]
+        public async Task Delete_ProductToDeleteDoesNotExists()
+        {
+            var id = Guid.NewGuid();
+            var testProduct = new Product { Id = id, Name = "Imie", Price = 3.0m };
+
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(false);
+            _mockProductRepository.Setup(repo => repo.Get(id)).ReturnsAsync(testProduct);
+            _mockProductRepository.Setup(repo => repo.Remove(testProduct));
+
+            Assert.ThrowsAsync<EntityNotFoundException>(async () => await _productService.Delete(id));
+
+  
+        }
+
+        #endregion
+
+
+
+
+
     }
 }
