@@ -66,7 +66,7 @@ namespace CoffeeMugTask_Test
 
 
         [Test]
-        public async Task GetAll_RepositoryReturnedNull()
+        public async Task GetAll_RepositoryReturnedEmptyCollection()
         {
             var products = new List<Product>();
 
@@ -162,6 +162,20 @@ namespace CoffeeMugTask_Test
 
             var e = Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Add(serviceInputProduct));
         }
+
+        [Test]
+        public async Task Add_ProductPriceIsLessThanZero()
+        {
+            var id = Guid.NewGuid();
+            var testProduct = new Product { Id = id, Name = "Imie", Price = -2.0m };
+            var serviceInputProduct = new Product { Name = "Imie", Price = -2.0m };
+
+
+            _mockProductRepository.Setup(repo => repo.Add(new Product() { Name = "Imie", Price = -2.0m })).Returns(testProduct);
+
+            var e = Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Add(serviceInputProduct));
+        }
+
         [Test]
         public async Task Add_ProductIdHasBeenGiven()
         {
@@ -269,6 +283,15 @@ namespace CoffeeMugTask_Test
         {
             var id = Guid.NewGuid();
             var serviceInputProduct = new Product { Id = id, Name = "Imie", Price = 0.0m };
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
+
+            Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Update(serviceInputProduct));
+        }
+        [Test]
+        public async Task Update_ProductPriceIsLessThanZero()
+        {
+            var id = Guid.NewGuid();
+            var serviceInputProduct = new Product { Id = id, Name = "Imie", Price = -10.0m };
             _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
 
             Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Update(serviceInputProduct));

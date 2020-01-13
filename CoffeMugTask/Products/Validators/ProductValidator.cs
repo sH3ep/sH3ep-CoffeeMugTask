@@ -18,7 +18,7 @@ namespace CoffeeMugTask.Products.Validators
                     .NotEmpty();
 
                 RuleFor(product => product.Price)
-                    .NotEmpty();
+                    .GreaterThan(0.00m);
             });
 
             RuleSet("Add", () =>
@@ -28,7 +28,7 @@ namespace CoffeeMugTask.Products.Validators
                     .NotEmpty();
 
                 RuleFor(product => product.Price)
-                    .NotEmpty();
+                    .GreaterThan(0.00m);
 
                 RuleFor(product => product.Id)
                     .Must(id => id.Equals(Guid.Empty));

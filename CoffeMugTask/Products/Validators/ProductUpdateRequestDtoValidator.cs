@@ -15,7 +15,7 @@ namespace CoffeeMugTask.Products.Validators
                 .NotEmpty();
 
             RuleFor(product => product.Price)
-                .NotEmpty();
+                .GreaterThan(0);
         }
     }
 }
