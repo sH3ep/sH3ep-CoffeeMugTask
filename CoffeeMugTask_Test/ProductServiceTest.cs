@@ -47,32 +47,44 @@ namespace CoffeeMugTask_Test
 
             return products;
         }
-       
+
         [Test]
         public async Task GetAll()
         {
-            var testProducts =await GetTestProducts(5);
+            var testProducts = await GetTestProducts(5);
 
             _mockProductRepository.Setup(repo => repo.GetAll()).ReturnsAsync(testProducts);
-            
+
 
             var products = await _productService.GetAll();
 
-            CollectionAssert.AreEqual(testProducts,products);
+            CollectionAssert.AreEqual(testProducts, products);
+
+        }
+
+
+        [Test]
+        public async Task GetAll_RepositoryReturnedNull()
+        {
+            var products = new List<Product>();
+
+            _mockProductRepository.Setup(repo => repo.GetAll()).ReturnsAsync(products);
+
+            var e = Assert.ThrowsAsync<EntityNotFoundException>(async () => await _productService.GetAll());
 
         }
 
         [Test]
         public async Task Get_GoodIdHasBeenGiven()
         {
-            var testProducts =await GetTestProducts(1);
+            var testProducts = await GetTestProducts(1);
             var testProduct = testProducts.ElementAt(0);
 
             _mockProductRepository.Setup(repo => repo.Get(testProduct.Id)).ReturnsAsync(testProduct);
 
             var product = await _productService.Get(testProduct.Id);
 
-            Assert.AreSame(testProduct,product);
+            Assert.AreSame(testProduct, product);
         }
 
         [Test]
@@ -81,12 +93,119 @@ namespace CoffeeMugTask_Test
             var testProducts = await GetTestProducts(1);
             var testProduct = testProducts.ElementAt(0);
 
-            _mockProductRepository.Setup(repo => repo.Get(testProduct.Id)).ReturnsAsync((Product) null);
+            _mockProductRepository.Setup(repo => repo.Get(testProduct.Id)).ReturnsAsync((Product)null);
 
-            var e = Assert.ThrowsAsync<EntityNotFoundException>(async()=> await _productService.Get(Guid.NewGuid()));
+            var e = Assert.ThrowsAsync<EntityNotFoundException>(async () => await _productService.Get(Guid.NewGuid()));
 
             Assert.That(e.Message.Equals("Product with that Id does not exists"));
+        }
 
+        [Test]
+        public async Task Add_GoodProductHasBeenGiven()
+        {
+            var id = Guid.NewGuid();
+            var testProduct = new Product { Id = id, Name = "Imie", Price = 12.54m };
+            var serviceInputProduct = new Product { Name = "Imie", Price = 12.54m };
+
+
+            _mockProductRepository.Setup(repo => repo.Add(new Product() { Name = "Imie", Price = 12.54m })).Returns(testProduct);
+
+            var productId = await _productService.Add(serviceInputProduct);
+
+            Assert.That(id.Equals(productId));
+        }
+
+        [Test]
+        public async Task Add_ToShortProductNameHasBeenGiven()
+        {
+            var id = Guid.NewGuid();
+            var testProduct = new Product { Id = id, Name = "", Price = 12.54m };
+
+
+            _mockProductRepository.Setup(repo => repo.Add(new Product() { Name = "Imie", Price = 12.54m })).Returns(testProduct);
+
+            var e = Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Add(testProduct));
+        }
+
+        [Test]
+        public async Task Add_ToLongProductNameHasBeenGiven()
+        {
+            var id = Guid.NewGuid();
+            var testProduct = new Product { Id = id, Name = "qwertyuiopwqwertyuiopwqwertyuiopwqwertyuiopwqwertyuiopwqwertyuiopwqwertyuiopwqwertyuiopwqwertyuiopwqwertyuiopwqwertyuiopw", Price = 12.54m };
+            var serviceInputProduct = new Product { Name = testProduct.Name, Price = 12.54m };
+
+            _mockProductRepository.Setup(repo => repo.Add(new Product() { Name = testProduct.Name, Price = 12.54m })).Returns(testProduct);
+
+            var e = Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Add(serviceInputProduct));
+        }
+
+        [Test]
+        public async Task Add_ProductPriceIsZero()
+        {
+            var id = Guid.NewGuid();
+            var testProduct = new Product { Id = id, Name = "Imie", Price = 0.0m };
+            var serviceInputProduct = new Product { Name = "Imie", Price = 0.0m };
+
+
+            _mockProductRepository.Setup(repo => repo.Add(new Product() { Name = "Imie", Price = 0.0m })).Returns(testProduct);
+
+            var e = Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Add(serviceInputProduct));
+        }
+        [Test]
+        public async Task Add_ProductIdHasBeenGiven()
+        {
+            var id = Guid.NewGuid();
+            var testProduct = new Product { Id = id, Name = "Imie", Price = 2.0m };
+            var serviceInputProduct = new Product { Name = "Imie", Price = 2.0m };
+
+
+            _mockProductRepository.Setup(repo => repo.Add(new Product() { Name = "Imie", Price = 2.0m })).Returns(testProduct);
+
+            var e = Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Add(testProduct));
+        }
+
+        [Test]
+        public async Task Add_ProductIsNull()
+        {
+            var e = Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Add((Product)null));
+        }
+
+
+        [Test]
+        public async Task Update_CorrectProductHasBeenGiven()
+        {
+            var id = Guid.NewGuid();
+            var testProduct = new Product { Id = id, Name = "Imie", Price = 3.0m };
+            var serviceInputProduct = new Product {Id = id, Name = "Imie", Price = 2.0m };
+
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(true);
+            _mockProductRepository.Setup(repo => repo.Update(new Product() { Id = id , Name = "Imie", Price = 2.0m })).Returns(testProduct);
+
+            await _productService.Update(serviceInputProduct);
+
+            Assert.Pass();
+        }
+
+        [Test]
+        public async Task Update_ProductIdNotExistsInDb()
+        {
+            var id = Guid.NewGuid();
+            var testProduct = new Product { Id = id, Name = "Imie", Price = 3.0m };
+            var serviceInputProduct = new Product { Id = id, Name = "Imie", Price = 2.0m };
+
+            _mockProductRepository.Setup(repo => repo.DoesProductExist(id)).Returns(false);
+
+           
+
+            var e = Assert.ThrowsAsync<EntityNotFoundException>(async () => await _productService.Update(serviceInputProduct));
+
+            Assert.Pass();
+        }
+
+        [Test]
+        public async Task Update_ProductIsNull()
+        {
+            var e = Assert.ThrowsAsync<EntityNotFoundException>(async () => await _productService.Update(null));
 
         }
     }

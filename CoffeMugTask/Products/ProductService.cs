@@ -23,12 +23,17 @@ namespace CoffeeMugTask.Products
 
         public async Task<Guid> Add(Product product)
         {
+            if(product is null)
+            {
+                throw new EntityValidationException("Product can't be null");
+            }
+
             var validator = new ProductValidator();
             var validationResult = validator.Validate(product, ruleSet: "Add");
 
             if (validationResult.IsValid)
             {
-                _productRepository.Add(product);
+                product =_productRepository.Add(product);
                 await _unitOfWork.Complete();
                 return product.Id;
             }
@@ -78,7 +83,7 @@ namespace CoffeeMugTask.Products
 
         public async Task Update(Product product)
         {
-            if (!_productRepository.DoesProductExist(product.Id))
+            if (product == null || !_productRepository.DoesProductExist(product.Id))
             {
                 throw new EntityNotFoundException("There are no any product with this Id to update");
             }

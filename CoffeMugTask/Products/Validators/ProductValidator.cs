@@ -1,5 +1,6 @@
 ﻿using CoffeeMugTask.Model;
 using FluentValidation;
+using System;
 
 namespace CoffeeMugTask.Products.Validators
 {
@@ -28,6 +29,9 @@ namespace CoffeeMugTask.Products.Validators
 
                 RuleFor(product => product.Price)
                     .NotEmpty();
+
+                RuleFor(product => product.Id)
+                    .Must(id => id.Equals(Guid.Empty));
             });
 
         }
