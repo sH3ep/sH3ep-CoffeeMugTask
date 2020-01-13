@@ -30,8 +30,6 @@ namespace CoffeeMugTask.Products.Validators
                 RuleFor(product => product.Price)
                     .GreaterThan(0.00m);
 
-                RuleFor(product => product.Id)
-                    .Must(id => id.Equals(Guid.Empty));
             });
 
         }

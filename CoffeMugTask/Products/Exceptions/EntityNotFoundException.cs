@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CoffeeMugTask.Persistance.Repositories.Exceptions
+namespace CoffeeMugTask.Products.Exceptions
 {
     public class EntityNotFoundException :Exception
     {

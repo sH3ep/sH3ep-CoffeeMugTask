@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using CoffeeMugTask.Model;
 using CoffeeMugTask.Persistance;
-using CoffeeMugTask.Persistance.Repositories.Exceptions;
 using CoffeeMugTask.Products;
+using CoffeeMugTask.Products.Exceptions;
 using Moq;
 using NUnit.Framework;
 
@@ -174,19 +174,6 @@ namespace CoffeeMugTask_Test
             _mockProductRepository.Setup(repo => repo.Add(new Product() { Name = "Imie", Price = -2.0m })).Returns(testProduct);
 
             var e = Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Add(serviceInputProduct));
-        }
-
-        [Test]
-        public async Task Add_ProductIdHasBeenGiven()
-        {
-            var id = Guid.NewGuid();
-            var testProduct = new Product { Id = id, Name = "Imie", Price = 2.0m };
-            var serviceInputProduct = new Product { Name = "Imie", Price = 2.0m };
-
-
-            _mockProductRepository.Setup(repo => repo.Add(new Product() { Name = "Imie", Price = 2.0m })).Returns(testProduct);
-
-            var e = Assert.ThrowsAsync<EntityValidationException>(async () => await _productService.Add(testProduct));
         }
 
         [Test]

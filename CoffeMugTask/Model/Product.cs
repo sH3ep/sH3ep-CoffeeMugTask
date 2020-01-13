@@ -10,9 +10,8 @@ namespace CoffeeMugTask.Model
     {
         public Guid Id { set; get; }
 
-        [StringLength(100, MinimumLength = 1, ErrorMessage = "Invalid character amount")]
         public string Name { set; get; }
-        [Required(ErrorMessage = "Wrong Price value")]
+        
         public decimal Price { set; get; }
     }
 }

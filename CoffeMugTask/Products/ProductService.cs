@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CoffeeMugTask.Model;
-using CoffeeMugTask.Persistance.Repositories.Exceptions;
+using CoffeeMugTask.Products.Exceptions;
 using CoffeeMugTask.Products.Validators;
 using FluentValidation;
 
@@ -85,7 +85,7 @@ namespace CoffeeMugTask.Products
         {
             if (product == null || !_productRepository.DoesProductExist(product.Id))
             {
-                throw new EntityNotFoundException("There are no any product with this Id to update");
+                throw new EntityNotFoundException("There are no any product to update");
             }
 
             var validator = new ProductValidator();

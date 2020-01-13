@@ -12,7 +12,7 @@ namespace CoffeeMugTask.Persistance
     public class CmtContext : DbContext
     {
 
-        public CmtContext(DbContextOptions<CmtContext> options):base(options)
+        public CmtContext(DbContextOptions<CmtContext> options) : base(options)
         {
 
         }
